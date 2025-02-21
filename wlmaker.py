@@ -32,15 +32,14 @@ def extract_data(file_path):
                 subdomains.add(match.group(1))
             dir_match = directory_pattern.search(line)
             if dir_match:
-                extracted_dirs.add(dir_match.group(1))
+                extracted_dirs.add(dir_match.group(1).strip())
     
     return params, directories, subdomains, extracted_dirs
 
 def save_wordlist(data, filename):
-    """Save extracted data to a file."""
+    """Save extracted data to a file without extra newlines."""
     with open(filename, 'w', encoding='utf-8') as f:
-        for item in sorted(data):
-            f.write(item + '\n')
+        f.write('\n'.join(sorted(data)))
 
 def main(target):
     output_file = "katana_output.txt"
