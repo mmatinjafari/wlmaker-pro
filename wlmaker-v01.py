@@ -2,6 +2,10 @@ import os
 import re
 import subprocess
 
+def sanitize_filename(target):
+    """Sanitize target to use in filenames."""
+    return target.replace("https://", "").replace("http://", "").replace("/", "_").replace(".", "_")
+
 def run_katana(target, output_file):
     """Run Katana to crawl the target and save output if not already present."""
     if not os.path.exists(output_file):
@@ -10,6 +14,15 @@ def run_katana(target, output_file):
         subprocess.run(command, shell=True, check=True)
     else:
         print("Using existing Katana output file.")
+
+def run_waybackurls(target, output_file):
+    """Run waybackurls to fetch archived URLs and save output if not already present."""
+    if not os.path.exists(output_file):
+        print("Fetching URLs with waybackurls...")
+        command = f"echo {target} | waybackurls > {output_file}"
+        subprocess.run(command, shell=True, check=True)
+    else:
+        print("Using existing waybackurls output file.")
 
 def extract_data(file_path):
     """Extract parameters, directories, and subdomains using regex."""
@@ -42,18 +55,24 @@ def save_wordlist(data, filename):
         f.write('\n'.join(sorted(data)))
 
 def main(target):
-    output_file = "katana_output.txt"
-    run_katana(target, output_file)
+    sanitized_target = sanitize_filename(target)
+    katana_output = f"katana_output_{sanitized_target}.txt"
+    wayback_output = f"wayback_output_{sanitized_target}.txt"
     
-    params, directories, subdomains, extracted_dirs = extract_data(output_file)
+    run_katana(target, katana_output)
+    run_waybackurls(target, wayback_output)
     
-    save_wordlist(params, "params_wordlist.txt")
-    save_wordlist(directories, "directories_wordlist.txt")
-    save_wordlist(subdomains, "subdomains_wordlist.txt")
-    save_wordlist(extracted_dirs, "extracted_directories_wordlist.txt")
+    params, directories, subdomains, extracted_dirs = extract_data(katana_output)
+    wb_params, wb_directories, wb_subdomains, wb_extracted_dirs = extract_data(wayback_output)
+    
+    save_wordlist(params.union(wb_params), f"params_wordlist_{sanitized_target}.txt")
+    save_wordlist(directories.union(wb_directories), f"directories_wordlist_{sanitized_target}.txt")
+    save_wordlist(subdomains.union(wb_subdomains), f"subdomains_wordlist_{sanitized_target}.txt")
+    save_wordlist(extracted_dirs.union(wb_extracted_dirs), f"extracted_directories_wordlist_{sanitized_target}.txt")
     
     print("Wordlists generated successfully!")
 
 if __name__ == "__main__":
     target_url = input("Enter target URL: ")
     main(target_url)
+
