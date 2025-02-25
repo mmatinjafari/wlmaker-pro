@@ -16,22 +16,21 @@ This script automates the process of gathering URLs, parameters, directories, an
 
 ## Features
 
-- Uses **Katana** to perform active crawling of live websites.
-- Uses **Waybackurls** to fetch historical URLs from the Wayback Machine.
+- Uses **Katana** to perform active crawling.
+- Uses **Waybackurls** to fetch historical URLs.
 - Extracts:
-  - **GET parameters**: Useful for finding input points to test for vulnerabilities like XSS or SQL injection.
-  - **Directories**: Helps in discovering hidden or sensitive paths for further enumeration.
-  - **Subdomains**: Identifies potential attack surfaces across the domain ecosystem.
-  - **Extracted directories**: Provides a clean list of paths for fuzzing or manual inspection.
-- Saves all extracted data into structured wordlists for use in tools like `ffuf` or `Burp Suite`.
-- Avoids redundant execution by checking existing output files to save time.
+  - **GET parameters**
+  - **Directories**
+  - **Subdomains**
+  - **Extracted directories**
+- Saves all extracted data into structured wordlists.
+- Avoids redundant execution by checking existing output files.
 
 ---
 
 ## Prerequisites
 
 - **Python 3.x** installed
-- No additional Python dependencies required (uses only standard libraries: `os`, `re`, `subprocess`, `argparse`).
 - Required tools:
   - [Katana](https://github.com/projectdiscovery/katana) (Install with `go install github.com/projectdiscovery/katana/cmd/katana@latest`)
   - [Waybackurls](https://github.com/tomnomnom/waybackurls) (Install with `go install github.com/tomnomnom/waybackurls@latest`)
@@ -44,29 +43,18 @@ This script automates the process of gathering URLs, parameters, directories, an
 2. Ensure **Katana** and **Waybackurls** are installed and available in your `$PATH`.
 3. Run the script:
    ```sh
-   `python3 wlmaker-pro.py`
+   python3 script.py
    ```
 
-## Examples
+## Usage
 
-<<<<<<< HEAD
-- Basic usage:
-=======
 ### Running the Script
 
 Run the script and enter the target URL when prompted:
->>>>>>> df4c89e3addf3ebd3aa89f4938c887020e4255be
 
-````sh
-`python3 wlmaker-pro.py
-Enter target URL: https://example.com`
-- With cookies and headers (for authenticated pages):
 ```sh
-python3 wlmaker-pro.py https://example.com --cookies "sessionid=abc123; user=xyz789" --headers "Authorization=Bearer token123"
+python3 script.py
 ```
-<<<<<<< HEAD
-````
-=======
 
 #### Example
 
@@ -113,4 +101,3 @@ Wordlists generated successfully!
 ## Support
 
 For any issues or suggestions, feel free to reach out!
->>>>>>> df4c89e3addf3ebd3aa89f4938c887020e4255be
