@@ -4,11 +4,15 @@
 
 This script automates the process of gathering URLs, parameters, directories, and subdomains using **Katana** and **Waybackurls**. It collects URLs from live crawling and archived sources, extracts valuable assets using regex, and saves them into organized wordlists.
 
+---
+
 ## Purpose
 
 - Perform **web reconnaissance** and **content discovery**.
 - Extract **parameters, directories, and subdomains** from live and historical data.
 - Generate wordlists for **further testing and fuzzing** in penetration testing.
+
+---
 
 ## Features
 
@@ -22,12 +26,16 @@ This script automates the process of gathering URLs, parameters, directories, an
 - Saves all extracted data into structured wordlists.
 - Avoids redundant execution by checking existing output files.
 
+---
+
 ## Prerequisites
 
 - **Python 3.x** installed
 - Required tools:
   - [Katana](https://github.com/projectdiscovery/katana) (Install with `go install github.com/projectdiscovery/katana/cmd/katana@latest`)
   - [Waybackurls](https://github.com/tomnomnom/waybackurls) (Install with `go install github.com/tomnomnom/waybackurls@latest`)
+
+---
 
 ## Installation
 
@@ -40,30 +48,34 @@ This script automates the process of gathering URLs, parameters, directories, an
 
 ## Usage
 
+### Running the Script
+
 Run the script and enter the target URL when prompted:
 
 ```sh
 python3 script.py
 ```
 
-Example:
+#### Example
 
-```
+```sh
 Enter target URL: https://example.com
 ```
 
 ## Output
 
+### Wordlists Generated
+
 The script generates the following wordlists:
 
-- `params_wordlist_<target>.txt` → Extracted GET parameters
-- `directories_wordlist_<target>.txt` → Extracted directories
-- `subdomains_wordlist_<target>.txt` → Extracted subdomains
-- `extracted_directories_wordlist_<target>.txt` → Cleaned list of directories
+- **`params_wordlist_<target>.txt`** → Extracted GET parameters
+- **`directories_wordlist_<target>.txt`** → Extracted directories
+- **`subdomains_wordlist_<target>.txt`** → Extracted subdomains
+- **`extracted_directories_wordlist_<target>.txt`** → Cleaned list of directories
 
-## Sample Output
+#### Sample Output
 
-```
+```sh
 Crawling target with Katana...
 Fetching URLs with waybackurls...
 Wordlists generated successfully!
@@ -81,10 +93,10 @@ Wordlists generated successfully!
 
 ## Roadmap for Improvement
 
-- Add **multi-threading** to speed up processing.
-- Include **custom user-agents and headers** for stealth.
-- Implement **proxy support** for anonymity.
-- Save **JSON output** for better integration with other tools.
+- Add multi-threading to speed up processing.
+- Include custom user-agents and headers for stealth.
+- Implement proxy support for anonymity.
+- Save JSON output for better integration with other tools.
 
 ## Support
 
