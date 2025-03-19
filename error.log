@@ -1,0 +1,7 @@
+# wlmaker-pro Error Log
+# Log format: YYYY-MM-DD HH:MM:SS - LEVEL - MESSAGE
+
+# Previous errors may be found below this line
+Error processing plannthat.com: Invalid URL: plannthat.com
+2025-03-19 23:08:10 - ERROR - Katana execution failed for https://jsonplaceholder.typicode.com: Command 'katana -u https://jsonplaceholder.typicode.com -o output/jsonplaceholder_typicode_com/katana_output.txt -d 1 -t 20' returned non-zero exit status 2.
+2025-03-19 23:08:22 - ERROR - Error processing https://jsonplaceholder.typicode.com: [Errno 2] No such file or directory: 'output/jsonplaceholder_typicode_com/katana_output.txt'

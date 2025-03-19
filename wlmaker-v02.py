@@ -49,7 +49,7 @@ def run_katana(target, output_file, cookies=None, headers=None, depth=None, time
         if depth:
             command += f" -d {depth}"
         if timeout:
-            command += f" -t {timeout}"
+            command += f" -timeout {timeout}"
         if scope:
             command += f" -scope {scope}"
         if exclude:
@@ -62,6 +62,8 @@ def run_katana(target, output_file, cookies=None, headers=None, depth=None, time
         except subprocess.CalledProcessError as e:
             logging.error(f"Katana execution failed for {target}: {e}")
             print(f"Error running Katana on {target}. See error.log for details.")
+            with open(output_file, 'w') as f:
+                f.write(f"# Error running Katana on {target}\n")
     else:
         print(f"Using existing Katana output for {target}.")
 
@@ -108,11 +110,12 @@ def extract_data(file_path, target_dir):
             url_obj = urlparse(line)
             if url_obj.query:
                 query_params = parse_qs(url_obj.query)
-                params.update(query_params.keys())
+                # Filter out empty parameters
+                params.update([k for k in query_params.keys() if k])
             
             # Extract other patterns
-            params.update(param_pattern.findall(line))
-            directories.update(dir_pattern.findall(line))
+            params.update([p for p in param_pattern.findall(line) if p])
+            directories.update([d for d in dir_pattern.findall(line) if d])
             
             match = subdomain_pattern.search(line)
             if match:
@@ -130,11 +133,11 @@ def extract_data(file_path, target_dir):
                 static_files.add(line)
             
             frag_match = fragment_pattern.search(line)
-            if frag_match:
+            if frag_match and frag_match.group(1):
                 fragments.add(frag_match.group(1))
             
             api_match = api_endpoint_pattern.search(line)
-            if api_match:
+            if api_match and api_match.group(1):
                 api_endpoints.add(api_match.group(1))
     
     # Save API endpoints
@@ -217,19 +220,28 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
         run_katana(target, katana_output, cookies, headers, depth, timeout, scope, exclude, proxy)
         run_waybackurls(target, wayback_output, wayback_timeout)
         
-        params, directories, subdomains, extracted_dirs, api_endpoints = extract_data(katana_output, target_dir)
-        wb_params, wb_directories, wb_subdomains, wb_extracted_dirs, wb_api_endpoints = extract_data(wayback_output, target_dir)
+        katana_exists = os.path.exists(katana_output) and os.path.getsize(katana_output) > 0
+        wayback_exists = os.path.exists(wayback_output) and os.path.getsize(wayback_output) > 0
         
-        # Extract POST parameters from Katana URLs
+        params, directories, subdomains, extracted_dirs, api_endpoints = set(), set(), set(), set(), set()
+        wb_params, wb_directories, wb_subdomains, wb_extracted_dirs, wb_api_endpoints = set(), set(), set(), set(), set()
+        
+        if katana_exists:
+            params, directories, subdomains, extracted_dirs, api_endpoints = extract_data(katana_output, target_dir)
+        
+        if wayback_exists:
+            wb_params, wb_directories, wb_subdomains, wb_extracted_dirs, wb_api_endpoints = extract_data(wayback_output, target_dir)
+        
         post_params = set()
-        with open(katana_output, 'r', encoding='utf-8', errors='ignore') as f:
-            for line in f:
-                try:
-                    url = line.strip()
-                    if url:
-                        post_params.update(extract_post_params(url, cookies, headers))
-                except Exception as e:
-                    logging.error(f"Error processing URL for POST params: {line.strip()}, Error: {e}")
+        if katana_exists:
+            with open(katana_output, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    try:
+                        url = line.strip()
+                        if url and not url.startswith('#'):
+                            post_params.update(extract_post_params(url, cookies, headers))
+                    except Exception as e:
+                        logging.error(f"Error processing URL for POST params: {line.strip()}, Error: {e}")
         
         all_params = params.union(wb_params).union(post_params)
         all_directories = directories.union(wb_directories)
@@ -237,7 +249,6 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
         all_extracted_dirs = extracted_dirs.union(wb_extracted_dirs)
         all_api_endpoints = api_endpoints.union(wb_api_endpoints)
         
-        # Save data based on chosen format
         output_files = {
             'params': {'data': all_params, 'txt': 'params_wordlist.txt', 'json': 'params.json', 'xml': 'params.xml'},
             'directories': {'data': all_directories, 'txt': 'directories_wordlist.txt', 'json': 'directories.json', 'xml': 'directories.xml'},
@@ -254,7 +265,6 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
             if output_format == 'xml' or output_format == 'all':
                 save_xml(file_info['data'], os.path.join(target_dir, file_info['xml']), data_type)
         
-        # Generate a summary report
         with open(os.path.join(target_dir, "summary.txt"), 'w', encoding='utf-8') as f:
             f.write(f"Target: {target}\n")
             f.write(f"Parameters found: {len(all_params)}\n")
@@ -285,6 +295,7 @@ def main():
     parser.add_argument('--exclude', help='Pattern to exclude from crawling')
     parser.add_argument('--threads', help='Number of parallel targets to process', type=int, default=5)
     parser.add_argument('--disable-ssl-verify', help='Disable SSL certificate verification', action='store_true')
+    parser.add_argument('--version', '-v', action='version', version='wlmaker-pro v0.2')
     args = parser.parse_args()
 
     # Process arguments
