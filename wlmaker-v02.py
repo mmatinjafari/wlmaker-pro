@@ -293,6 +293,43 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
         logging.error(f"Error processing {target}: {str(e)}")
         print(f"Error processing {target}: {e}")
 
+def show_best_practices():
+    """Display best practices for using wlmaker-pro."""
+    print("""
+🔍 wlmaker-pro Best Practices Guide 🔍
+
+1. Basic Usage:
+   wlmaker https://example.com
+
+2. Authentication & Headers:
+   wlmaker --cookies "session=abc123" --headers "Authorization: Bearer token123" https://example.com
+
+3. Comprehensive Crawling:
+   wlmaker --depth 3 --timeout 30 --scope strict https://example.com
+
+4. Multiple Output Formats:
+   wlmaker --format all https://example.com
+
+5. Batch Processing:
+   wlmaker --file urls.txt --threads 5
+
+6. Proxy Usage:
+   wlmaker --proxy http://127.0.0.1:8080 https://example.com
+
+7. Advanced Options:
+   wlmaker --exclude "*.jpg|*.png" --disable-ssl-verify https://example.com
+
+📝 Tips:
+- Use --scope strict for focused crawling
+- Set appropriate timeouts for large sites
+- Use --format all for complete data collection
+- Consider using proxies for large-scale crawling
+- Check output/<domain>/summary.txt for results
+
+For detailed help, use: wlmaker --help
+For version info, use: wlmaker --version
+""")
+
 def main():
     parser = argparse.ArgumentParser(description='An advanced tool for crawling and data extraction.')
     parser.add_argument('url', nargs='?', help='Target URL (e.g., https://example.com)')
@@ -312,6 +349,11 @@ def main():
     parser.add_argument('--disable-ssl-verify', help='Disable SSL certificate verification', action='store_true')
     parser.add_argument('--version', '-v', action='version', version='wlmaker-pro v0.2')
     args = parser.parse_args()
+
+    # Show best practices if no arguments provided
+    if not args.url and not args.file and not args.version:
+        show_best_practices()
+        return
 
     # Process arguments
     if not args.url and not args.file:
