@@ -295,16 +295,25 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
 
 def show_best_practices():
     """Display stylized help menu for wlmaker-pro."""
-    # ANSI color codes
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    CYAN = '\033[96m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-    END = '\033[0m'
+    # Check if terminal supports colors
+    if os.environ.get('TERM') and 'color' in os.environ.get('TERM'):
+        # ANSI color codes
+        RED = '\033[91m'
+        GREEN = '\033[92m'
+        YELLOW = '\033[93m'
+        BLUE = '\033[94m'
+        MAGENTA = '\033[95m'
+        CYAN = '\033[96m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
+        END = '\033[0m'
+    else:
+        # No colors if terminal doesn't support them
+        RED = GREEN = YELLOW = BLUE = MAGENTA = CYAN = BOLD = UNDERLINE = END = ''
+
+    # Force color output
+    os.environ['FORCE_COLOR'] = '1'
+    os.environ['PYTHON_FORCE_COLOR'] = '1'
 
     logo = f"""
 {BLUE} _    _ _                  _             {END}
