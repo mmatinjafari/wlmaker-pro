@@ -11,6 +11,10 @@ from bs4 import BeautifulSoup
 import requests
 import json
 from tqdm import tqdm
+import urllib3
+
+# Suppress insecure request warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Configure logging
 logging.basicConfig(
@@ -193,14 +197,25 @@ def save_xml(data, filename, root_name='data'):
     root = ET.Element(root_name)
     
     for item in sorted(data):
-        element = ET.SubElement(root, 'item')
-        element.text = item
+        try:
+            element = ET.SubElement(root, 'item')
+            # Escape special characters and ensure valid XML
+            element.text = str(item).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        except Exception as e:
+            logging.error(f"Error adding item to XML: {str(e)}")
+            continue
     
-    # Pretty print XML
-    xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
-    
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(xml_str)
+    try:
+        # Pretty print XML
+        xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
+        
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(xml_str)
+    except Exception as e:
+        logging.error(f"Error saving XML file {filename}: {str(e)}")
+        # Fallback to simple XML format
+        tree = ET.ElementTree(root)
+        tree.write(filename, encoding='utf-8', xml_declaration=True)
 
 def process_target(target, cookies=None, headers=None, depth=None, timeout=None, 
                   output_format='txt', proxy=None, scope=None, exclude=None, 
@@ -283,7 +298,7 @@ def main():
     parser.add_argument('url', nargs='?', help='Target URL (e.g., https://example.com)')
     parser.add_argument('--file', help='File containing a list of URLs')
     parser.add_argument('--cookies', help='Cookies for authentication (e.g., sessionid=abc123)')
-    parser.add_argument('--headers', help='Additional headers (e.g., Authorization=Bearer token123)', nargs='*', default=[])
+    parser.add_argument('--headers', metavar='HEADER:VALUE', help='Additional headers (e.g., "User-Agent: Mozilla/5.0")', nargs='+')
     parser.add_argument('--depth', help='Crawl depth for Katana', type=int)
     parser.add_argument('--timeout', help='Timeout in seconds for Katana', type=int)
     parser.add_argument('--wayback-timeout', help='Timeout in seconds for waybackurls', type=int, default=120)
@@ -299,8 +314,19 @@ def main():
     args = parser.parse_args()
 
     # Process arguments
+    if not args.url and not args.file:
+        parser.error("Please provide a URL or a file with URLs")
+
     cookies = args.cookies
-    headers = dict(h.split('=', 1) for h in args.headers) if args.headers else None
+    headers = {}
+    if args.headers:
+        for header in args.headers:
+            if ':' in header:
+                key, value = header.split(':', 1)
+                headers[key.strip()] = value.strip()
+            else:
+                print(f"Warning: Ignoring invalid header format: {header}")
+
     depth = args.depth
     timeout = args.timeout
     output_format = args.format
@@ -312,8 +338,6 @@ def main():
     
     if args.disable_ssl_verify:
         # Disable SSL warnings
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         requests.packages.urllib3.disable_warnings()
 
     if args.file:
