@@ -7,7 +7,8 @@ import xml.dom.minidom as minidom
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, parse_qs
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+import warnings
 import requests
 import json
 from tqdm import tqdm
@@ -15,6 +16,9 @@ import urllib3
 
 # Suppress insecure request warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Suppress XML parsing warnings
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 # Configure logging
 logging.basicConfig(
@@ -155,7 +159,14 @@ def extract_post_params(url, cookies=None, headers=None):
     """Extract POST parameters from HTML forms."""
     try:
         response = requests.get(url, cookies=cookies, headers=headers, timeout=10, verify=False)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Check content type to determine parser
+        content_type = response.headers.get('content-type', '').lower()
+        if 'xml' in content_type:
+            soup = BeautifulSoup(response.text, 'xml')
+        else:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
         post_params = set()
         
         # Extract from regular forms
@@ -380,7 +391,9 @@ def show_best_practices():
 
 def main():
     parser = argparse.ArgumentParser(description='An advanced tool for crawling and data extraction.')
+    # Add both positional and optional URL arguments
     parser.add_argument('url', nargs='?', help='Target URL (e.g., https://example.com)')
+    parser.add_argument('-u', '--url', dest='url_opt', help='Target URL (e.g., https://example.com)')
     parser.add_argument('--file', help='File containing a list of URLs')
     parser.add_argument('--cookies', help='Cookies for authentication (e.g., sessionid=abc123)')
     parser.add_argument('--headers', metavar='HEADER:VALUE', help='Additional headers (e.g., "User-Agent: Mozilla/5.0")', nargs='+')
@@ -399,12 +412,12 @@ def main():
     args = parser.parse_args()
 
     # Show best practices if no arguments provided
-    if not args.url and not args.file:
+    if not args.url and not args.url_opt and not args.file:
         show_best_practices()
         return
 
     # Process arguments
-    if not args.url and not args.file:
+    if not args.url and not args.url_opt and not args.file:
         parser.error("Please provide a URL or a file with URLs")
 
     cookies = args.cookies
@@ -433,11 +446,12 @@ def main():
     if args.file:
         with open(args.file, 'r') as f:
             targets = [line.strip() for line in f if line.strip()]
-    elif args.url:
-        targets = [args.url]
     else:
-        print("Please provide a URL or a file with URLs.")
-        return
+        # Use either the positional url argument or the -u/--url argument
+        target_url = args.url or args.url_opt
+        if not target_url.startswith(('http://', 'https://')):
+            target_url = 'https://' + target_url
+        targets = [target_url]
 
     with ThreadPoolExecutor(max_workers=threads) as executor:
         futures = [executor.submit(
