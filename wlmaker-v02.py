@@ -294,41 +294,69 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
         print(f"Error processing {target}: {e}")
 
 def show_best_practices():
-    """Display best practices for using wlmaker-pro."""
-    print("""
-🔍 wlmaker-pro Best Practices Guide 🔍
+    """Display stylized help menu for wlmaker-pro."""
+    logo = """
+ _    _ _                  _             
+| |  | | |                | |            
+| |  | | |_ __ ___   __ _| | _____ _ __ 
+| |/\| | | '_ ` _ \ / _` | |/ / _ \ '__|
+\  /\  / | | | | | | (_| |   <  __/ |   
+ \/  \/|_|_| |_| |_|\__,_|_|\_\___|_|   
+                                v0.2 by @mmatinjafari
+WⓁmaker-pro - Advanced Web Crawler & Parameter Extractor
+        https://github.com/mmatinjafari/wlmaker-pro
 
-1. Basic Usage:
-   wlmaker https://example.com
+"""
+    usage = """
+Usage: wlmaker [-u [--url]] [-f[--file=]] [options]
 
-2. Authentication & Headers:
-   wlmaker --cookies "session=abc123" --headers "Authorization: Bearer token123" https://example.com
+Example: wlmaker https://example.com
+         wlmaker --file urls.txt --format all
 
-3. Comprehensive Crawling:
-   wlmaker --depth 3 --timeout 30 --scope strict https://example.com
+Best Practice Command:
+  wlmaker -u domain.com --format all --depth 3 --timeout 30 --scope strict --cookies "session=xyz" --headers "User-Agent: Mozilla/5.0"
 
-4. Multiple Output Formats:
-   wlmaker --format all https://example.com
+Core Arguments:
+  -u,  --url            Target URL to scan
+  -f,  --file           File containing list of URLs
+  -h,  --help           Show this help message
+  -v,  --version        Show version information
 
-5. Batch Processing:
-   wlmaker --file urls.txt --threads 5
+Output Options:
+  --format              Output format (txt, json, xml, all)
+  --threads             Number of parallel targets to process
 
-6. Proxy Usage:
-   wlmaker --proxy http://127.0.0.1:8080 https://example.com
+Crawling Options:
+  --depth              Crawl depth for Katana
+  --timeout            Timeout in seconds for Katana
+  --scope              Crawling scope (strict, fuzzy, subdomain)
+  --exclude            Pattern to exclude from crawling
 
-7. Advanced Options:
-   wlmaker --exclude "*.jpg|*.png" --disable-ssl-verify https://example.com
+Authentication:
+  --cookies            Cookies for authentication
+  --headers            Custom headers for requests
+  --proxy             Proxy for requests
+  --disable-ssl-verify Disable SSL verification
 
-📝 Tips:
-- Use --scope strict for focused crawling
-- Set appropriate timeouts for large sites
-- Use --format all for complete data collection
-- Consider using proxies for large-scale crawling
-- Check output/<domain>/summary.txt for results
+Additional Features:
+  --wayback-timeout    Timeout for waybackurls fetching
 
-For detailed help, use: wlmaker --help
-For version info, use: wlmaker --version
-""")
+Output Files Generated:
+  + params_wordlist.txt          - Extracted parameters
+  + directories_wordlist.txt     - Discovered directories
+  + subdomains_wordlist.txt     - Found subdomains
+  + api_endpoints.txt           - API endpoints
+  + static_files.txt           - Static file URLs
+  + fragments.txt             - URL fragments
+  + summary.txt              - Summary of findings
+  + *.json                  - JSON format outputs
+  + *.xml                  - XML format outputs
+
+Tools Used:
+  + Katana               https://github.com/projectdiscovery/katana
+  + Waybackurls         https://github.com/tomnomnom/waybackurls
+"""
+    print(logo + usage)
 
 def main():
     parser = argparse.ArgumentParser(description='An advanced tool for crawling and data extraction.')
@@ -351,7 +379,7 @@ def main():
     args = parser.parse_args()
 
     # Show best practices if no arguments provided
-    if not args.url and not args.file and not args.version:
+    if not args.url and not args.file:
         show_best_practices()
         return
 
