@@ -295,53 +295,64 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
 
 def show_best_practices():
     """Display stylized help menu for wlmaker-pro."""
-    logo = """
- _    _ _                  _             
-| |  | | |                | |            
-| |  | | |_ __ ___   __ _| | _____ _ __ 
-| |/\| | | '_ ` _ \ / _` | |/ / _ \ '__|
-\  /\  / | | | | | | (_| |   <  __/ |   
- \/  \/|_|_| |_| |_|\__,_|_|\_\___|_|   
-                                v0.2 by @mmatinjafari
-WⓁmaker-pro - Advanced Web Crawler & Parameter Extractor
-        https://github.com/mmatinjafari/wlmaker-pro
+    # ANSI color codes
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
+
+    logo = f"""
+{BLUE} _    _ _                  _             {END}
+{BLUE}| |  | | |                | |            {END}
+{BLUE}| |  | | |_ __ ___   __ _| | _____ _ __ {END}
+{BLUE}| |/\\| | | '_ ` _ \\ / _` | |/ / _ \\ '__|{END}
+{BLUE}\\  /\\  / | | | | | | (_| |   <  __/ |   {END}
+{BLUE} \\/  \\/|_|_| |_| |_|\\__,_|_|\\_\\___|_|   {END}
+                                {YELLOW}v0.2 by @mmatinjafari{END}
+{CYAN}WⓁmaker-pro - Advanced Web Crawler & Parameter Extractor{END}
+        {CYAN}https://github.com/mmatinjafari/wlmaker-pro{END}
 
 """
-    usage = """
-Usage: wlmaker [-u [--url]] [-f[--file=]] [options]
+    usage = f"""
+{BLUE}Usage:{END} wlmaker [-u [--url]] [-f[--file=]] [options]
 
-Example: wlmaker https://example.com
+{GREEN}Example:{END} wlmaker https://example.com
          wlmaker --file urls.txt --format all
 
-Best Practice Command:
+{YELLOW}Best Practice Command:{END}
   wlmaker -u domain.com --format all --depth 3 --timeout 30 --scope strict --cookies "session=xyz" --headers "User-Agent: Mozilla/5.0"
 
-Core Arguments:
+{MAGENTA}Core Arguments:{END}
   -u,  --url            Target URL to scan
   -f,  --file           File containing list of URLs
   -h,  --help           Show this help message
   -v,  --version        Show version information
 
-Output Options:
+{CYAN}Output Options:{END}
   --format              Output format (txt, json, xml, all)
   --threads             Number of parallel targets to process
 
-Crawling Options:
+{GREEN}Crawling Options:{END}
   --depth              Crawl depth for Katana
   --timeout            Timeout in seconds for Katana
   --scope              Crawling scope (strict, fuzzy, subdomain)
   --exclude            Pattern to exclude from crawling
 
-Authentication:
+{YELLOW}Authentication:{END}
   --cookies            Cookies for authentication
   --headers            Custom headers for requests
   --proxy             Proxy for requests
   --disable-ssl-verify Disable SSL verification
 
-Additional Features:
+{BLUE}Additional Features:{END}
   --wayback-timeout    Timeout for waybackurls fetching
 
-Output Files Generated:
+{MAGENTA}Output Files Generated:{END}
   + params_wordlist.txt          - Extracted parameters
   + directories_wordlist.txt     - Discovered directories
   + subdomains_wordlist.txt     - Found subdomains
@@ -352,7 +363,7 @@ Output Files Generated:
   + *.json                  - JSON format outputs
   + *.xml                  - XML format outputs
 
-Tools Used:
+{CYAN}Tools Used:{END}
   + Katana               https://github.com/projectdiscovery/katana
   + Waybackurls         https://github.com/tomnomnom/waybackurls
 """
