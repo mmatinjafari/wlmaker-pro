@@ -5,3 +5,7 @@
 Error processing plannthat.com: Invalid URL: plannthat.com
 2025-03-19 23:08:10 - ERROR - Katana execution failed for https://jsonplaceholder.typicode.com: Command 'katana -u https://jsonplaceholder.typicode.com -o output/jsonplaceholder_typicode_com/katana_output.txt -d 1 -t 20' returned non-zero exit status 2.
 2025-03-19 23:08:22 - ERROR - Error processing https://jsonplaceholder.typicode.com: [Errno 2] No such file or directory: 'output/jsonplaceholder_typicode_com/katana_output.txt'
+2025-03-20 00:12:41 - ERROR - Waybackurls execution timed out for https://example.com
+2025-03-20 00:14:05 - ERROR - Error processing https://example.com: not well-formed (invalid token): line 5, column 156648
+2025-03-20 00:16:14 - ERROR - Error extracting POST params from https://example.com: string indices must be integers, not 'str'
+2025-03-20 00:16:14 - ERROR - Error saving XML file output/example_com/params.xml: not well-formed (invalid token): line 5, column 156692
