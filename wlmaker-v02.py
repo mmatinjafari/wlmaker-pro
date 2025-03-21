@@ -12,6 +12,7 @@ import requests
 import json
 from tqdm import tqdm
 import urllib3
+import sys
 
 # Suppress insecure request warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -294,9 +295,9 @@ def process_target(target, cookies=None, headers=None, depth=None, timeout=None,
         print(f"Error processing {target}: {e}")
 
 def show_best_practices():
-    """Display stylized help menu for wlmaker-pro."""
+    """Display best practices for using the tool."""
     # Check if terminal supports colors
-    if os.environ.get('TERM') and 'color' in os.environ.get('TERM'):
+    if sys.stdout.isatty():
         # ANSI color codes
         RED = '\033[91m'
         GREEN = '\033[92m'
@@ -341,6 +342,7 @@ def show_best_practices():
   -f,  --file           File containing list of URLs
   -h,  --help           Show this help message
   -v,  --version        Show version information
+       --update         Update wlmaker-pro to the latest version
 
 {CYAN}Output Options:{END}
   --format              Output format (txt, json, xml, all)
@@ -378,6 +380,28 @@ def show_best_practices():
 """
     print(logo + usage)
 
+def run_update():
+    """Run the update script to update the tool."""
+    print("Running update script...")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    update_script = os.path.join(script_dir, "update.sh")
+    
+    # Check if update script exists
+    if not os.path.exists(update_script):
+        print(f"Error: Update script not found at {update_script}")
+        return False
+    
+    # Make sure it's executable
+    os.chmod(update_script, 0o755)
+    
+    # Run the update script with sudo
+    try:
+        subprocess.run(["sudo", update_script], check=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error running update script: {e}")
+        return False
+
 def main():
     parser = argparse.ArgumentParser(description='An advanced tool for crawling and data extraction.')
     parser.add_argument('url', nargs='?', help='Target URL (e.g., https://example.com)')
@@ -395,8 +419,18 @@ def main():
     parser.add_argument('--exclude', help='Pattern to exclude from crawling')
     parser.add_argument('--threads', help='Number of parallel targets to process', type=int, default=5)
     parser.add_argument('--disable-ssl-verify', help='Disable SSL certificate verification', action='store_true')
+    parser.add_argument('--update', help='Update the tool to the latest version', action='store_true')
     parser.add_argument('--version', '-v', action='version', version='wlmaker-pro v0.2')
     args = parser.parse_args()
+
+    # Handle update flag if present
+    if args.update:
+        print("Updating wlmaker-pro to the latest version...")
+        if run_update():
+            print("Update completed successfully.")
+        else:
+            print("Update failed. Please run the update script manually: sudo ./update.sh")
+        return
 
     # Show best practices if no arguments provided
     if not args.url and not args.file:
